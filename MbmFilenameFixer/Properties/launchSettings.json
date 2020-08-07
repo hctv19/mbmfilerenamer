@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MbmFilenameFixer": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Users\\hctv1\\Source\\repos\\MbmFilenameFixer\\testfiles\" 386"
+    }
+  }
+}
