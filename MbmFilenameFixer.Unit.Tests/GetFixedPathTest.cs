@@ -92,7 +92,7 @@ namespace MbmFilenameFixer.Unit.Tests
 
                 var fileInfo = new FileInfo(path);
                 var dirName = fileInfo.DirectoryName;
-                var fixedDirectoryName = Program.FixDirectoryName(dirName, MaxPathLength);
+                var fixedDirectoryName = Program.ApplyDirectoryRenamingRules(dirName, MaxPathLength);
                 Assert.IsTrue(fixedDirectoryName.Length <= MaxPathLength, $"Could not fix {dirName}\n New Name: {fixedDirectoryName}\n Old Length: {dirName.Length} Length: {fixedDirectoryName.Length} \n Line: {line}");
                 line++;
             }

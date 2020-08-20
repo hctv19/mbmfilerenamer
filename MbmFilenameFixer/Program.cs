@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -9,59 +8,54 @@ namespace MbmFilenameFixer
 {
     public static class Program
     {
-        private const string ReportFileName = "FilenameUpdateReport.html";
+        private const string FileReportFileName = "FilenameUpdateReport.html";
+        private const string DirectoryReportFileName = "DirectoryUpdateReport.html";
 
         private static readonly IDictionary<string, string> PrioritySubstitionMap = new Dictionary<string, string>
         {
-            ["200228 EY Novartis SimuLyve axSpA Screening Tool Steering Committee Meeting (Esther Yi)"] = string.Empty,
-            ["200306 DM Merz SimuLyve Virtual Sponsor CRO Kickoff Meeting (Dave Matthews) NOT CONTRACTED"] = string.Empty,
-            ["200306 MC Paris - Chicago, PRG Meetings - Events (Tango, Carson) NOT CONTRACTED"] =string.Empty,
-            ["191007 MM US Medical IHD Secukinumab Protocol Roundtable (Gomez, McMorrow, Tandon)"] =string.Empty,
-            ["191025-C M930121002 KG JR Merz SimuLyve Inv Mtg Belotero IOH Pivotal Study (K Gregg J Rangnow)"]=string.Empty,
-            ["191126 RM Novartis CINC424H212201 SimuLyve Virtual IM (Ross Merryweather)"]=string.Empty,
-            ["190826 WS Boehringer Ingelheim SimuLyve Filming Graphic Arts (Scherres) NOT CONTRACTED"]=string.Empty,
-            ["190722 WS Novartis SimuLyve MS Musical & Physical Therapy, Film (Wendy Su Mary Sheridan)"]=string.Empty,
-            ["190607 Ashfield Novartis AV, Generation Program Update AAIC (Eastburn, Duff) - CANCELLED"]=string.Empty,
-            ["190312 SB Novartis LTW888A12401 SimuLyve® Film for Sim Virtual Clinical Trial Train (Burmaster)"]=string.Empty,
-            ["151101 AD Novartis eLearning QVM149B2301 (Askin)"]=string.Empty,
+            ["Graphics for use with Novartis email to clients"] = "Graphics",
+            ["200228 EY Novartis SimuLyve axSpA Screening Tool Steering Committee Meeting (Esther Yi)"] = "200228 EY NVS SimuLyve axSpA MTG (Yi)",
+            ["200228 Contracts and Pricing, Client"] = "200228 Contracts",
+
+            ["200306 DM Merz SimuLyve Virtual Sponsor CRO Kickoff Meeting (Dave Matthews) NOT CONTRACTED"] = "200306 DM Merz SimuLyve CRO Meeting (Matthews) NOT CONTRACTED",
+            ["200306 Contracts and Pricing, Client"] = "200306 Contracts",
+
+            ["180108 VP Boehringer Ingelheim 1280.0022 SimuLyve Virtual, Film, On Dem, AV, F2F (K Crossley)"] = "180108 VP BI 1280.0022 SimuLyve, Film, OD, AV, F2F (Crossley)",
+            ["180108 Hotel Site Selection"] = "Hotel",
+            ["180108 Contracts and Pricing, Client"] = "180108 Contracts",
+            ["Hotel Correspondence, RFPs & Availabilty, Frankfurt & U.S. Meetings"] = "Correspondence, RFPs, Frankfurt US Mtg",
+            ["Frankfurt Marriott (COPY)"] = "Frankfurt",
+            ["Photos and Videos of Frankfurt Marriott Hotel during site visit"] = "Photos Videos",
+
+            ["110115 Contract, Client"] = "110115 Contract",
+            ["Contract and Addendum or Amendments with client"] = "Contract",
+            ["Addendum G (never signed)-VOID"] = "Addendum G not signed,VOID",
+            ["Create Addendum for Nadia \"110115 AD  eLearning QVM149B2301(Amy Lita de los Reyes)\""] = "Create Addendum for Nadia 110115 AD eLearning QVM149B2301",
+
+            ["191025-C M930121002 KG JR Merz SimuLyve Inv Mtg Belotero IOH Pivotal Study (K Gregg J Rangnow)"] = "191025-C M930121002 KG JR Merz SimuLyve Inv Mtg Belotero IOH Pivotal Study (Gregg, Rangnow)",
+            ["191025-C Contracts and Pricing, Client"] = "191025-C Contracts",
+            ["Contract Templates.00"] = "Templates.00",
+            ["MBM Webcast Proposal prior Templates"] = "MBM Templates",
+            ["MBM Webcast Proposal Template.28"] = "MBM Template.28",
+
+            ["170405 MS Novartis EMA401A2201 SimuLyve Broadcast Live of  Hybrid F2F Meeting, Addendum B.02 COUNTERSIGNED"] = "COUNTERSIGNED",
+            ["Patient Recruitment SimuLyve Virtual Meeting, 161105 Novartis SG LCZ696B2320 eLearning.02 COUNTERSIGNED"] = "COUNTERSIGNED",
+
 
             ["140923 Novartis SimuLyve On Demand"] = "140923 Novartis SOD",
-            ["092314 Contracts, Addendums and Task Orders with Client"]= "092314 Contract Client",
-            ["2014 Task Order 1035 Amendment A.02 to the Initial Task Order"]= "2014 TO 1035 Amendment A.02",
+            ["092314 Contracts, Addendums and Task Orders with Client"] = "092314 Contract Client",
+            ["2014 Task Order 1035 Amendment A.02 to the Initial Task Order"] = "2014 TO 1035 Amendment A.02",
             ["Task Order 1035 Amendment A.02 Internal Development Documents"] = "TO 1035 Amendment A.02 Int Devel",
 
-            ["170606 MQ Novartis CNP520A2202J eLearning (Matt Quinn)"]= "170606 MQ Novartis (Quinn)",
-            ["Participant Recruitment, Participant Centric"]= "Recruitment,Participant",
-            ["Films Edits UTILIZED for Distribution"]= "Distribution Edits",
-            ["File that was provided for publication to YouTube"]="YouTube",
-            ["Do Something Amazing End Alzheimer's Now"]="Do Something Amazing",
+            ["170606 MQ Novartis CNP520A2202J eLearning (Matt Quinn)"] = "170606 MQ Novartis (Quinn)",
+            ["Participant Recruitment, Participant Centric"] = "Recruitment,Participant",
+            ["Films Edits UTILIZED for Distribution"] = "Distribution Edits",
+            ["File that was provided for publication to YouTube"] = "YouTube",
+            ["Do Something Amazing End Alzheimer's Now"] = "Do Something Amazing",
             ["Do Something Amazing, End Alzheimers Now"] = "Do Something Amazing",
             ["Do Something Amazing, End Alzheimer's Now"] = "Do Something Amazing",
-           
-            ["170606 MQ Novartis CNP520A2202J eLearning (Matt Quinn)\\170606 Edit\\Participant Recruitment, Participant Centric\\Do Something Amazing\\Edit Participant Recruitment Film BACKUP OF HARDRIVE\\Exports Orginized by Steve\\Films Edits UTILIZED for Distribution\\Do Something Amazing, End Alzheimer's Now (full film)\\Do Something Amazing, End Alzheimers Now.19\\File that was provided for publication to YouTube"] = "170606 MQ Novartis (Quinn)\\170606 Edit\\Recruitment,Participant\\Do Something Amazing\\Edit Participant BU OF HD\\Export Steve\\Distribution Edits \\Do Something Amazing,(full film)\\Do Something Amazing.19\\YouTube",
-            ["180108 VP Boehringer Ingelheim 1280.0022 SimuLyve Virtual, Film, On Dem, AV, F2F (K Crossley)\\180108 Hotel Site Selection\\Hotel Correspondence, RFPs & Availabilty, Frankfurt & U.S. Meetings\\Correspondence, Hotels (including RFP responses)\\Marriott\\Frankfurt Marriott (COPY)\\Photos of Event Space\\Photos and Videos of Frankfurt Marriott Hotel during site visit\\Frankfurt Marriott Selects\\Champions Bar Photos"] = @"180108 VP BI 1280.0022 SimuLyve, Film, OD, AV, F2F (Crossley)\\180108 Hotel \\Correspondence, RFPs, Frankfurt US Mtg\\Corr, Hotels \\Marriott\\Frankfurt\\Photos\\Photos Videos\\Frankfurt Marriott\\Champions Bar",
-            ["140923 Novartis SimuLyve On Demand\\092314 Contracts, Addendums and Task Orders with Client\\2014 Task Order 1035 Amendment A.02 to the Initial Task Order\\Task Order 1035 Amendment A.02 Internal Development Documents\\Main Contracts Novartis\\General Services Agreement & Afilliate Agreement between Novartis and MBM\\Copy of all agreements (clarified in folders)\\Novartis Agreements\\Agreement through Rita and Marie\\Signed Amendments to Agreement through Rita & Marie"] = @"140923 Novartis SOD\\092314 Contract Client\\2014 TO 1035 Amendment A.02\\TO 1035 Amendment A.02 Int Devel\\Main Contract Novartis\\GSA & Afilliate Agmt \\Copy agreements\\Novartis Agreements\\Rita Marie\\Signed",
 
-            ["170305 AP Novartis eLearning AIN457F2366 (Ana Prado)\\170305 Reference Materials-prior project 110515\\110515 Contract, Client\\Contract Templates\\Novartis\\Novartis SimuLyve Virtual Meeting Contract\\MBM Webcast Proposal Template.24-38\\MBM Webcast Proposal Template.28\\Novartis Internal Email to Clients re SimuLyve\\Graphics for use with Novartis email to clients"] = string.Empty,
-            ["170305 AP Novartis eLearning AIN457F2366 (Ana Prado)\\170305 Reference Materials-prior project 110515\\110515 Contract, Client\\Contract Templates\\Novartis\\Novartis SimuLyve Virtual Meeting Contract\\MBM Webcast Proposal Template.24-38\\MBM Webcast Proposal Template.27\\Novartis Internal Email to Clients re SimuLyve\\Graphics for use with Novartis email to clients"] = string.Empty,
-            ["170305 AP Novartis eLearning AIN457F2366 (Ana Prado)\\170305 Reference Materials-prior project 110515\\110515 Contract, Client\\Contract Templates\\Novartis\\Novartis SimuLyve Virtual Meeting Contract\\MBM Webcast Proposal Template.24-38\\MBM Webcast Proposal Template.26\\Novartis Internal Email to Clients re SimuLyve\\Graphics for use with Novartis email to clients"] = string.Empty,
-            ["170305 AP Novartis eLearning AIN457F2366 (Ana Prado)\\170305 Reference Materials-prior project 110515\\110515 Contract, Client\\Contract Templates\\Novartis\\Novartis SimuLyve Virtual Meeting Contract\\MBM Webcast Proposal Template.24-38\\MBM Webcast Proposal Template.25\\Novartis Internal Email to Clients re SimuLyve\\Graphics for use with Novartis email to clients"] = string.Empty,
-
-
-
-            ["Patient Recruitment SimuLyve Virtual Meeting, 161105 Novartis SG LCZ696B2320 eLearning.02 COUNTERSIGNED"] = "COUNTERSIGNED",
-            [" as that's the full guiding document for this project"] = string.Empty,
-            ["Contract Versions Sent to MBM from Client with Client Cover Pages "] = "CTRCT Versions Sent to MBM from client",
-            [" to create the final signed by both parties"] = string.Empty,
-            [" (initially between hotel and Boehringer, then between hotel and MBM)"] = string.Empty,
-            [", including cloud computing certification questions"] = string.Empty,
-            ["170405 MS Novartis EMA401A2201 SimuLyve Broadcast Live of  Hybrid F2F Meeting, Addendum B.02 COUNTERSIGNED"] = "COUNTERSIGNED",
-            ["Metric Tools, Case Studies, Research for additions to Contract"] = "Metric Tools, Case Studies, Research",
-            ["Latest from Daniel - confusing"] = "Daniel",
-            ["Change Order.1.02C to Contract.04 180108 VP Boehringer Ingelheim 1280.0022.02"] = string.Empty, // Talk to Steve
-            ["Contract.05-10 was not signed by BI, instead these modifictions are incorporated in change order.1.02)"] = string.Empty, // Talk to Steve
-            ["Contract.05 (will not be signed by BI, instead these modifictions will be incorporated in change order.1.02)"] = string.Empty, // Talk to Steve
-            [" during site visit"] = string.Empty,
+            ["Contract.05-10 was not signed by BI, instead these modifictions are incorporated in change order.1.02)"] = "Contract.05-10 not signed by BI", // Talk to Steve
 
         };
 
@@ -140,145 +134,287 @@ namespace MbmFilenameFixer
             ["with"] = "w/"
         };
 
+
+        // Arg 0: Path
+        // Arg 1: Operation
+        // Arg 3: Max Length
+        // Arg 4: --apply 
         static void Main(string[] args)
         {
-            var maxPathLength = 350;
+            // Config Params
+            string path="";
+            string operation = "fix-filenames";
+            int maxPathLength = 350;
+            bool reportOnly = true;
 
-            var reportOnly = true;
-            var path = args[0];
-            if (args.Length > 1)
+            for (var i = 0; i < args.Length; i++)
             {
-                if (int.TryParse(args[1], out var userSpecifiedMaxPathLength))
+                switch (i)
                 {
-                    maxPathLength = userSpecifiedMaxPathLength;
+                    case 0:
+                        path = args[i];
+                        break;
+                    case 1:
+                        operation = args[i];
+                        break;
+                    case 2:
+                        if (int.TryParse(args[i], out var userSpecifiedMaxPathLength))
+                        {
+                            maxPathLength = userSpecifiedMaxPathLength;
+                        }
+                        break;
+                    case 3:
+                        if (args[i] == "--apply")
+                        {
+                            reportOnly = false;
+                        }
+                        break;
                 }
+            }
 
-                if (args.Length > 2)
+            if (operation == "fix-directories")
+            {
+                if (reportOnly)
                 {
-                    if (args[2] == "--apply")
-                    {
-                        reportOnly = false;
-                    }
+                    Console.WriteLine("Running File Renaming utility in fix-directories Read-Only mode");
+                    Console.WriteLine("A report of proposed renaming operations will be generated, but no directories will be modified");
+                    ProcessDirectories(path, reportOnly, maxPathLength);
                 }
-
+                else
+                {
+                    Console.WriteLine("Running File Renaming utility in fix-directories Apply mode");
+                    Console.WriteLine("Directory names will be modified as part of this operation. Type 'yes' to proceed:");
+                    var dirProceedPrompt = Console.ReadLine();
+                    if (dirProceedPrompt != "yes") return;
+                    ProcessDirectories(path, reportOnly, maxPathLength);
+                }
             }
-
-            if (reportOnly)
+            else if (operation == "fix-filenames")
             {
-                Console.WriteLine("Running File Renaming utility in Read-Only mode");
-                Console.WriteLine("A report of proposed renaming operations will be generated, but no files will be modified");
-            }
-            else
-            {
-                Console.WriteLine("Running File Renaming utility in Write mode");
-                Console.WriteLine("File names will be modified as part of this operation. Type 'yes' to proceed:");
-                var promptResponse = Console.ReadLine();
-                if (promptResponse != "yes") return;
-            }
-
-            var timer = System.Diagnostics.Stopwatch.StartNew();
-            List<FileRenameOperationSummary> operations;
-
-            try
-            {
-                //operations = ProcessFileOperations(reportOnly, path, maxPathLength);
-            }
-            finally
-            {
-                timer.Stop();
+                if (reportOnly)
+                {
+                    Console.WriteLine("Running File Renaming utility in Read-Only mode");
+                    Console.WriteLine("A report of proposed renaming operations will be generated, but no files will be modified");
+                    ProcessFileOperations(reportOnly, path, maxPathLength);
+                }
+                else
+                {
+                    Console.WriteLine("Running File Renaming utility in Write mode");
+                    Console.WriteLine("File names will be modified as part of this operation. Type 'yes' to proceed:");
+                    var promptResponse = Console.ReadLine();
+                    if (promptResponse != "yes") return;
+                    ProcessFileOperations(reportOnly, path, maxPathLength);
+                }
             }
 
-            //GenerateReport(reportOnly, TimeSpan.FromMilliseconds(timer.ElapsedMilliseconds), operations, maxPathLength);
             Console.WriteLine("File Renaming operation complete");
             Console.WriteLine("Press Enter key to exit...");
             Console.ReadLine();
         }
 
-        public static List<DirectoryRenameOperationSummary> ProcessDirectories(string startingPath, bool reportOnly, int maxPathLength)
+        // Directory Fix Operations
+
+        public static void ProcessDirectories(string startingPath, bool reportOnly, int maxPathLength)
         {
+            var timer = System.Diagnostics.Stopwatch.StartNew();
             var directoryOperations = new List<DirectoryRenameOperationSummary>();
+
+            try
+            {
+                DirectoryRenameOperationSummary directoryFixResult;
+                var reportModeFixedDirectoryCache = new Dictionary<string, string>();
+                while ((directoryFixResult = EnumerateAndFixNextDirectory(startingPath, maxPathLength, reportOnly, reportModeFixedDirectoryCache)) != null)
+                {
+                    directoryOperations.Add(directoryFixResult);
+                    reportModeFixedDirectoryCache[directoryFixResult.StartName] = directoryFixResult.EndName;
+                }
+            }
+            finally
+            {
+                timer.Stop();
+                GenerateDirectoryRenameReport(timer.Elapsed, directoryOperations, maxPathLength);
+            }
+        }
+
+        public static DirectoryRenameOperationSummary EnumerateAndFixNextDirectory(string startingPath, int maxPathLength, bool reportOnly, IDictionary<string,string> reportModeFixedDirectoryCache)
+        {
+            DirectoryRenameOperationSummary operationSummary = null;
             var allDirectories = Directory.EnumerateDirectories(startingPath, "*.*", SearchOption.AllDirectories);
             foreach (var dir in allDirectories)
             {
-                var fixedDirectoryName = FixDirectoryName(dir, maxPathLength);
-                directoryOperations.Add(new DirectoryRenameOperationSummary(dir, fixedDirectoryName));
-
-                if (reportOnly == false)
+                string workingDir = (string)dir.Clone();
+                if (reportOnly)
                 {
-                    Directory.Move(dir, fixedDirectoryName);
+                    foreach (var (key, value) in reportModeFixedDirectoryCache)
+                    {
+                        workingDir = workingDir.Replace(key, value);
+                    }
+                }
+
+                // Iterate through directories and try to fix the first one with a name that's too long
+                // Returns the first directory that it has a suggested fix for
+                var fixedDirectoryName = TryFixDirectoryName(workingDir, maxPathLength);
+
+                if (fixedDirectoryName != workingDir)
+                {
+                    if (reportOnly == false)
+                    {
+                        if (Directory.Exists(fixedDirectoryName) == false)
+                        {
+                            Directory.CreateDirectory(fixedDirectoryName);
+                        }
+                        
+                        Directory.Move(workingDir, fixedDirectoryName);
+                    }
+                    
+                    operationSummary = fixedDirectoryName.Length <= maxPathLength
+                        ? new DirectoryRenameOperationSummary(workingDir, fixedDirectoryName)
+                        : new DirectoryRenameOperationSummary(workingDir, fixedDirectoryName) { PathTooLong = true };
+                    break;
                 }
             }
-
-            return directoryOperations;
+            return operationSummary;
         }
 
-        public static string FixDirectoryName(string directoryName, int maxPathLength)
+
+        public static string TryFixDirectoryName(string directoryName, int maxPathLength)
         {
             // Priority Substitutions First
             if (directoryName.Length <= maxPathLength) return directoryName;
+            var updatedDirectoryName = (string)directoryName.Clone();
             foreach (var (key, value) in PrioritySubstitionMap)
             {
-                directoryName = directoryName.Replace(key, value, StringComparison.InvariantCultureIgnoreCase);
-                if (directoryName.Length <= maxPathLength) break;
+                updatedDirectoryName = updatedDirectoryName.Replace(key, value, StringComparison.InvariantCultureIgnoreCase);
+                if (updatedDirectoryName.Length <= maxPathLength) break;
             }
 
             // Generic substitutions second
-            if (directoryName.Length <= maxPathLength) return directoryName;
+            if (updatedDirectoryName.Length <= maxPathLength) return updatedDirectoryName;
             foreach (var (key, value) in FileNameSubstitutionMap)
             {
-                directoryName = directoryName.Replace(key, value, StringComparison.InvariantCultureIgnoreCase);
-                if (directoryName.Length <= maxPathLength) break;
+                updatedDirectoryName = updatedDirectoryName.Replace(key, value, StringComparison.InvariantCultureIgnoreCase);
+                if (updatedDirectoryName.Length <= maxPathLength) break;
             }
 
-            return directoryName;
+            return updatedDirectoryName;
         }
 
-        //public static List<FileRenameOperationSummary> ProcessFileOperations(bool reportOnly, string dir, int maxPathLength)
-        //{
-        //    var allFiles = Directory.EnumerateFiles(dir, "*.*", SearchOption.AllDirectories);
-        //    var operations = new List<FileRenameOperationSummary>();
-        //    foreach (var file in allFiles)
-        //    {
-        //        var fileInfo = new FileInfo(file);
+        public static void GenerateDirectoryRenameReport(TimeSpan timeToRun, IList<DirectoryRenameOperationSummary> operations, int maxPathLength)
+        {
+            var reportLines = new List<string>
+            {
+                "<!DOCTYPE html>",
+                "<html>",
+                "<head>",
+                "<style>",
+                "table {",
+                "font-family: arial, sans-serif;",
+                "border-collapse: collapse;",
+                "width: 100%;",
+                "}",
+                "td, th {",
+                "border: 1px solid #dddddd;",
+                "text-align: left;",
+                "padding: 8px;",
+                "}",
+                "tr:nth-child(even)",
+                "{",
+                    "background-color: #dddddd;",
+                "}",
+                "</style>",
+                "</head>",
+                "<body><h1>Directory Rename Report</h1><br/>",
+                $"<p><b>Execution Time: {timeToRun}</p>",
+                $"<p><b>Max Configured Path Length: {maxPathLength}</p>",
+                $"<p><b>Found {operations.Count} directories needing to be renamed</p>",
+                $"<p><b>Found {operations.Count(o => o.PathTooLong)} directories with paths longer than {maxPathLength} characters </p>",
+                $"<p><b>Found {operations.Count(o => o.EndName.Length > 360)} directories with directory names longer than 360 characters </p>",
+                $"<p><b>Found {operations.Count(o => o.EndName.Length > 370)} directories with directory names longer than 370 characters </p>",
+                $"<p><b>Found {operations.Count(o => o.EndName.Length > 380)} directories with directory names longer than 380 characters </p>",
+                $"<p><b>Found {operations.Count(o => o.EndName.Length > 390)} directories with directory names longer than 390 characters </p>",
+                $"<p><b>Found {operations.Count(o => o.EndName.Length > 400)} directories with directory names longer than 400 characters </p>",
+                $"<p><b>Found {operations.Count(o => o.PathTooLong)} directories with names that could not be automatically shortened to fit</p>"
+            };
 
-        //        try
-        //        {
 
-        //            var newFilePath = GetFixedPath(maxPathLength, fileInfo);
-        //            if (newFilePath == null) continue;
+            // Path Length Too Long
+            var pathTooLongDirectories = operations.Where(o => o.PathTooLong).ToList();
+            reportLines.Add($"<h1>Path Too Long ({pathTooLongDirectories.Count})</h1><br><table>");
+            reportLines.Add("<tr><th>Current Directory</th><th>Current Length</th><th>Shortened Directory</th><th>Shortened Length</th></tr>");
+            reportLines.AddRange(pathTooLongDirectories.Select(operation => $"<tr><td>{operation.StartName}</td><td>{operation.StartName.Length}</td><td>{operation.EndName}</td><td>{operation.EndName.Length}</td></tr>"));
+            reportLines.Add("</table>");
 
-        //            // Add transformation to report history
-        //            operations.Add(new FileRenameOperationSummary(currentFilePath, newFilePath, fileInfo.DirectoryName.Length));
+            // Fixable Directories
+            var fixableDirectories = operations.Where(o => !o.PathTooLong).ToList();
+            reportLines.Add($"<h1>Fixable Directories ({fixableDirectories.Count})</h1><br><table>");
+            reportLines.Add("<tr><th>Current Directory</th><th>Current Length</th><th>New Directory</th><th>New Length</th></tr>");
+            reportLines.AddRange(fixableDirectories.Select(operation => $"<tr><td>{operation.StartName}</td><td>{operation.StartName.Length}</td><td>{operation.EndName}</td><td>{operation.EndName.Length}</td></tr>"));
+            reportLines.Add("</table>");
 
-        //            // Apply the file rename operation if reportOnly == false
-        //            if (reportOnly == false)
-        //            {
-        //                try
-        //                {
-        //                    Console.WriteLine($"Renaming {currentFilePath} to {newFilePath}");
-        //                    Directory.Move(currentFilePath, newFilePath);
-        //                }
-        //                catch (Exception e)
-        //                {
-        //                    Console.WriteLine($"[Error] Unable to rename file {currentFilePath} to {newFilePath}");
-        //                    Console.WriteLine($"[Error] {e.Message}");
-        //                }
-        //            }
-        //        }
-        //        catch (PathTooLongException)
-        //        {
-        //            operations.Add(new FileRenameOperationSummary(currentFilePath, string.Empty, fileInfo.DirectoryName.Length) { PathTooLong = true });
-        //        }
-        //        catch (FilenameShorteningNotEnoughException)
-        //        {
-        //            operations.Add(new FileRenameOperationSummary(currentFilePath, string.Empty, fileInfo.DirectoryName.Length) { ShortenedFilenameTooLong = true });
-        //        }
-        //    }
+            reportLines.Add("</body></html>");
 
-        //    return operations;
-        //}
+            Console.WriteLine($"Writing report to {DirectoryReportFileName}");
+            File.WriteAllLines($"{DirectoryReportFileName}", reportLines);
+        }
 
-        public static string GetFixedPath(int maxPathLength, FileInfo fileInfo, Dictionary<string, string> map)
+
+        // Filename Fix Operations
+        public static void ProcessFileOperations(bool reportOnly, string dir, int maxPathLength)
+        {
+            var timer = System.Diagnostics.Stopwatch.StartNew();
+            var operations = new List<FileRenameOperationSummary>();
+
+            try
+            {
+                var allFiles = Directory.EnumerateFiles(dir, "*.*", SearchOption.AllDirectories);
+                foreach (var file in allFiles)
+                {
+                    var fileInfo = new FileInfo(file);
+
+                    try
+                    {
+
+                        var newFilePath = GetFixedPath(maxPathLength, fileInfo, FileNameSubstitutionMap);
+                        if (newFilePath == null) continue;
+
+                        // Add transformation to report history
+                        operations.Add(new FileRenameOperationSummary(file, newFilePath, fileInfo.DirectoryName.Length));
+
+                        // Apply the file rename operation if reportOnly == false
+                        if (reportOnly == false)
+                        {
+                            try
+                            {
+                                Console.WriteLine($"Renaming {file} to {newFilePath}");
+                                Directory.Move(file, newFilePath);
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine($"[Error] Unable to rename file {file} to {newFilePath}");
+                                Console.WriteLine($"[Error] {e.Message}");
+                            }
+                        }
+                    }
+                    catch (PathTooLongException)
+                    {
+                        operations.Add(new FileRenameOperationSummary(file, string.Empty, fileInfo.DirectoryName.Length) { PathTooLong = true });
+                    }
+                    catch (FilenameShorteningNotEnoughException)
+                    {
+                        operations.Add(new FileRenameOperationSummary(file, string.Empty, fileInfo.DirectoryName.Length) { ShortenedFilenameTooLong = true });
+                    }
+                }
+
+            }
+            finally
+            {
+                timer.Stop();
+                GenerateFileRenameReport(reportOnly, timer.Elapsed, operations, maxPathLength);
+            }
+
+        }
+
+        public static string GetFixedPath(int maxPathLength, FileInfo fileInfo, IDictionary<string, string> map)
         {
             var directory = fileInfo.DirectoryName;
             if (fileInfo.DirectoryName.Length > 350)
@@ -332,7 +468,7 @@ namespace MbmFilenameFixer
             return newFullPath;
         }
 
-        private static string FixDirectoryName(string directoryName, Dictionary<string, string> map)
+        private static string FixDirectoryName(string directoryName, IDictionary<string, string> map)
         {
             foreach (var (key, value) in map)
             {
@@ -342,15 +478,7 @@ namespace MbmFilenameFixer
             return directoryName;
         }
 
-        public class PathTooLongException : Exception
-        {
-        }
-
-        public class FilenameShorteningNotEnoughException : Exception
-        {
-        }
-
-        public static void GenerateReport(bool reportOnly, TimeSpan timeToRun, IList<FileRenameOperationSummary> operations, int maxPathLength)
+        public static void GenerateFileRenameReport(bool reportOnly, TimeSpan timeToRun, IList<FileRenameOperationSummary> operations, int maxPathLength)
         {
             var reportLines = new List<string>
             {
@@ -392,14 +520,14 @@ namespace MbmFilenameFixer
             // Path Length Too Long
             var pathTooLongFiles = operations.Where(o => o.PathTooLong).ToList();
             reportLines.Add($"<h1>Path Too Long ({pathTooLongFiles.Count})</h1><br><table>");
-            reportLines.Add("<tr><th>Current Filename</th><th>Current Length</th><th>New Filename</th><th>New Length</th></tr>");
-            reportLines.AddRange(pathTooLongFiles.Select(operation => $"<tr><td>{operation.CurrentFileName}</td><td>{operation.CurrentFileName.Length}</td><td>{operation.NewFileName}</td><td>{operation.NewFileName.Length}</td></tr>"));
+            reportLines.Add("<tr><th>Current Filename</th><th>Current Length</th></tr>");
+            reportLines.AddRange(pathTooLongFiles.Select(operation => $"<tr><td>{operation.CurrentFileName}</td><td>{operation.CurrentFileName.Length}</td></tr>"));
             reportLines.Add("</table>");
 
             // Unfixable Files
             var unfixableFiles = operations.Where(o => o.ShortenedFilenameTooLong).ToList();
             reportLines.Add($"<h1>Filename Unfixable ({unfixableFiles.Count})</h1><br><table>");
-            reportLines.Add("<tr><th>Current Filename</th><th>Current Length</th><th>New Filename</th><th>New Length</th></tr>");
+            reportLines.Add("<tr><th>Current Filename</th><th>Current Length</th><th>Shortened Filename</th><th>Shortened Length</th></tr>");
             reportLines.AddRange(unfixableFiles.Select(operation => $"<tr><td>{operation.CurrentFileName}</td><td>{operation.CurrentFileName.Length}</td><td>{operation.NewFileName}</td><td>{operation.NewFileName.Length}</td></tr>"));
             reportLines.Add("</table>");
 
@@ -412,36 +540,45 @@ namespace MbmFilenameFixer
 
             reportLines.Add("</body></html>");
 
-            Console.WriteLine($"Writing report to {ReportFileName}");
-            File.WriteAllLines($"{ReportFileName}", reportLines);
+            Console.WriteLine($"Writing report to {FileReportFileName}");
+            File.WriteAllLines($"{FileReportFileName}", reportLines);
         }
+    }
 
-        public class DirectoryRenameOperationSummary
+    public class PathTooLongException : Exception
+    {
+    }
+
+    public class FilenameShorteningNotEnoughException : Exception
+    {
+    }
+
+    public class DirectoryRenameOperationSummary
+    {
+        public DirectoryRenameOperationSummary(string startName, string endName)
         {
-            public DirectoryRenameOperationSummary(string startName, string endName)
-            {
-                StartName = startName;
-                EndName = endName;
-            }
-
-            public string StartName { get; set; }
-            public string EndName { get; set; }
+            StartName = startName;
+            EndName = endName;
         }
 
-        public class FileRenameOperationSummary
+        public string StartName { get; set; }
+        public string EndName { get; set; }
+        public bool PathTooLong { get; set; }
+    }
+
+    public class FileRenameOperationSummary
+    {
+        public FileRenameOperationSummary(string cName, string nName, int pathLength)
         {
-            public FileRenameOperationSummary(string cName, string nName, int pathLength)
-            {
-                CurrentFileName = cName;
-                NewFileName = nName;
-                PathLength = pathLength;
-            }
-
-            public int PathLength { get; set; }
-            public bool PathTooLong { get; set; }
-            public bool ShortenedFilenameTooLong { get; set; }
-            public string CurrentFileName { get; set; }
-            public string NewFileName { get; set; }
+            CurrentFileName = cName;
+            NewFileName = nName;
+            PathLength = pathLength;
         }
+
+        public int PathLength { get; set; }
+        public bool PathTooLong { get; set; }
+        public bool ShortenedFilenameTooLong { get; set; }
+        public string CurrentFileName { get; set; }
+        public string NewFileName { get; set; }
     }
 }

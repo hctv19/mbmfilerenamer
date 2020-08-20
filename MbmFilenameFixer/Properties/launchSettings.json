@@ -2,7 +2,7 @@
   "profiles": {
     "MbmFilenameFixer": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Users\\hctv1\\Source\\repos\\MbmFilenameFixer\\testfiles\" 386"
+      "commandLineArgs": "\"C:\\V1\" fix-directories 200 --apply"
     }
   }
 }

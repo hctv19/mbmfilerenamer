@@ -19,4 +19,9 @@
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;MSTest::A82C52F3-2184-454D-9405-625C7A1B731A::.NETCoreApp,Version=v3.1::MbmFilenameFixer.Unit.Tests.GetFixedPathTest.GetFixedPath_AllFiles_AbleToFix&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=ce1e2f3a_002Dfd07_002D48ae_002Dad82_002D070b0cb3a604/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="GetFixedPath_AllFiles_AbleToFix #4" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;MSTest::A82C52F3-2184-454D-9405-625C7A1B731A::.NETCoreApp,Version=v3.1::MbmFilenameFixer.Unit.Tests.GetFixedPathTest.GetFixedPath_AllFiles_AbleToFix&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
